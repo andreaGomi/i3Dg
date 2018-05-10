@@ -24,10 +24,10 @@
 
 		<script type="text/x-glsl" id="vertex">
 			attribute float displacement;
-			varying float angle;
+			attribute float angle;
 
 			void main() {
-		    	vec3 newPosition = position + normal * displacement;
+		    	vec3 newPosition = position + normal * displacement + sin(angle);
 				// transforms the vertex from object space to clip space coords
 				gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
 
@@ -61,24 +61,23 @@
 			var vs = document.getElementById("vertex").textContent;
 			var fs = document.getElementById("fragment").textContent;
 
+			attributes = {
+						displacement: new Float32Array(),
+						angle: 				0.0
+					};
+
 			var sphereMaterial = new THREE.ShaderMaterial({uniforms: attributes, vertexShader: vs, fragmentShader: fs });
 
 			sphere = new THREE.Mesh(
 				new THREE.SphereBufferGeometry( 10, 32, 16 ),
 				sphereMaterial );
 
-			var attributes = {
-						displacement:	{ type: "float", value: new Float32Array() }
-						angle: 				{ type: "float", value: '0.0'}
-					};
+			attributes.displacement = new Float32Array( sphere.geometry.attributes.position.count );
 
-			displacementInit = new Float32Array( sphere.geometry.attributes.position.count );
-
-			for(var i = 0; i < displacementInit.length; i++) {
-			   //displacement[i]=Math.random() * 30;
-				 displacementInit[i]=5;
+			for(var i = 0; i < attributes.displacement.length; i++) {
+			   attributes.displacement[i]=Math.random() * 30;
+				 //displacement[i]=5;
 		    }
-			attributes.displacement.value = displacementInit;
 
 			scene.add( sphere );
 			stats = new Stats();
@@ -89,11 +88,19 @@
 			controls = new THREE.OrbitControls( camera );
     }
 
+		function modify(){
+
+			if(attributes.angle >= 6.28){
+					attributes.angle = 0.0;
+			}else{
+				attributes.angle += 0.1;
+			}
+		}
 
 		function Render() {
 
 			requestAnimationFrame( Render );
-
+			modify();
 			stats.update();
 			renderer.render(scene, camera);
 		}
