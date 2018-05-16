@@ -12,7 +12,7 @@
 
 		canvas {
 			width: 100%;
-			height: 100%; 
+			height: 100%;
 		}
 
 	</style>
@@ -57,7 +57,8 @@
 			document.body.appendChild( renderer.domElement );
 
 			// scene code here
-
+			console.log( 'THREE.WebGLRenderer', THREE.REVISION );
+			
 			var vs = document.getElementById("vertex").textContent;
 			var fs = document.getElementById("fragment").textContent;
 

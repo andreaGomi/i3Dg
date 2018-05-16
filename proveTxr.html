@@ -39,6 +39,8 @@
 			camera.position.set(13,2,13);
 			camera.lookAt( new THREE.Vector3(0,0,0));
 
+			console.log( 'THREE.WebGLRenderer', THREE.REVISION );
+			
       var txrSide = new THREE.TextureLoader().load('new textures/rock2.jpg');
       var txrTop = new THREE.TextureLoader().load('new textures/rock2.jpg');
       txrSide.wrapS = THREE.MirroredRepeatWrapping;
