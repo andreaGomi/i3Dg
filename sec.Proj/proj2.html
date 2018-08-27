@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - reflection mapping</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: #f0f0f0;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				color: #222;
+				padding: 5px;
+				font-family: Monospace;
+				font-size: 13px;
+				text-align: center;
+			}
+
+			a {
+				color: #000;
+				text-decoration: none;
+			}
+
+			a:hover {
+				color: #0080ff;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div id="info" style="color: white">
+			<a href="https://github.com/robertoranon/int3D" target="_blank" style="color: white">Interactive 3D Graphics 2017 code</a> - reflection mapping<br />
+		</div>
+
+        <script src="lib/three.min.js"></script>
+    		<script src="lib/stats.min.js"></script>
+    		<script src="lib/OrbitControls.js"></script>
+    		<script src='lib/dat.gui.min.js'></script>
+    		<script src="lib/GLTFLoader.js"></script>
+
+    <script>
+
+        var renderer = new THREE.WebGLRenderer( { antialias: true } );
+        var camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 1000 );
+        var scene = new THREE.Scene();
+        scene.name = "scenaTHREEjs";
+        var controls = new THREE.OrbitControls( camera, renderer.domElement );
+        //Array di 8 stringhe contenenti i nomi dei figli dell'oggetto GLTF
+        var objNames = ["becco","disegno","disegno","disegno","disegno","disegno","elmo","visiera"];
+
+
+        // loaders cubemap/envMap/texture
+        var cubeMapLoader = new THREE.CubeTextureLoader();
+        var tLoader = new THREE.TextureLoader();
+
+        // load irradiance map
+        cubeMapLoader.setPath( 'irradianceMap/vanc/' );
+        var irradianceMap = cubeMapLoader.load( [
+            'px.jpg', 'nx.jpg',
+            'py.jpg', 'ny.jpg',
+            'pz.jpg', 'nz.jpg'
+        ] );
+        // Load background cube map
+        cubeMapLoader.setPath( 'envMap/vanc/' );
+        var envMap = cubeMapLoader.load( [
+            'px.jpg', 'nx.jpg',
+            'py.jpg', 'ny.jpg',
+            'pz.jpg', 'nz.jpg'
+        ] );
+        scene.background = envMap;
+        envMap.minFilter = THREE.LinearMipMapLinearFilter;
+
+        /*
+        var uniform = {
+          // materiale
+          cdiff:	{ type: "t", value: new THREE.Vector3() },
+          // environment
+          envMap:	{ type: "t", value: envMap},
+          irradianceMap:	{ type: "t", value: irradianceMap},
+
+          pointLightPosition:	{ type: "v3", value: new THREE.Vector3() },
+          clight:	{ type: "v3", value: new THREE.Vector3() },
+
+        }*/
+
+        //********* MATERIALI **************************
+        // carbonio
+				/*
+        var carbPath = "textures/carbonFiber/";
+        var carbonFiber = new THREE.MeshStandardMaterial({map: loadTexture(carbPath + "albedo.png"),
+                                                          envMap: envMap,
+                                                          side: THREE.FrontSide,
+                                                          metalnessMap: loadTexture(carbPath + "metalness.png"),
+                                                          //normalMap: tLoader.load("textures/carbonFib/normalMap.png"),
+                                                          roughnessMap: loadTexture(carbPath + "roughness.png")
+                                                        });
+
+        // rame
+        var coPath = 'textures/copper/';
+        var copper = new THREE.MeshStandardMaterial({map: tLoader.load(coPath + 'albedo.png'),
+                                                    envMap: envMap,
+                                                    metalness: 0.8,
+                                                    displacementMap: tLoader.load(coPath + 'heightMap.png'),
+                                                    displacementScale: 0.01,
+                                                    roughnessMap: tLoader.load(coPath + 'roughness.png'),
+                                                    side: THREE.DoubleSide});
+      // oro
+      var oPath = 'textures/gold/';
+      var gold = new THREE.MeshStandardMaterial({map:loadTexture(oPath + 'albedo.jpg'),
+                                                  envMap: envMap,
+                                                  metalnessMap:loadTexture(oPath + 'metalness.jpg'),
+                                                  //normalMap: loadTexture("textures/gold/normal.jpg"),
+                                                  roughnessMap: loadTexture(oPath + 'roughness.jpg'),
+                                                  side: THREE.DoubleSide});
+*/
+        var mat1 = new THREE.MeshStandardMaterial({color: 0xeeeeee,
+                                                  metalness: 0.8,
+                                                  roughness: 0.3,
+                                                  envMap: envMap,
+                                                  side: THREE.DoubleSide});
+        var mat2 = new THREE.MeshStandardMaterial({color: 0xee8830,
+                                                  metalness: 0.8,
+                                                  roughness: 0.3,
+                                                  envMap: envMap,
+                                                  side: THREE.DoubleSide});
+
+        //******** lights ****************************
+        var mainLight = new THREE.Mesh( new THREE.SphereGeometry( 1, 16, 16), new THREE.MeshBasicMaterial ({color: 0xffff00, wireframe:true}));
+        mainLight.position.set(20,20,20);
+        cMainLight = new THREE.Vector3(1.25, 1.25, 1.25);
+
+        var backLight = new THREE.Mesh( new THREE.SphereGeometry( 1, 16, 16), new THREE.MeshBasicMaterial ({color: 0xffff00, wireframe:true}));
+        backLight.position.set(-10,8,-10);
+        cBackLight = new THREE.Vector3(0.4, 0.4, 0.4);
+
+        var light = new THREE.PointLight( 0xffffff, 1, 100 );
+        light.position.set( 10, 10, -10 );
+        scene.add( light );
+
+
+        function loadTexture(file) {
+            var texture = new THREE.TextureLoader().load( file , function ( texture ) {
+              texture.minFilter = THREE.LinearMipMapLinearFilter;
+              texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+              texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+              texture.offset.set(0, 0);
+              texture.needsUpdate = true;
+              render();
+            } )
+            return texture;
+        }
+
+
+        function applyMaterial(material, name){
+
+          //Un po di debugging
+          console.log("scene length: " + scene.children.length);
+
+          for(let i = 0; i < scene.children.length; i++){
+            console.log("for: " + i);
+            console.log( scene.children[i]);
+          }
+
+
+          let b = 0;
+          let obj = scene.children[2];    //indicizzo il modello gltf
+          console.log("Ho caricato: " + obj);
+
+          console.log("Entro nel While");
+          while(!(obj.children.length == 8)){ //finchè non arrivo al nodo radice delle mesh
+            console.log("for n.ro: " + b);
+            obj = obj.children[0];
+            b++;
+          }
+          for(let i = 0; i < obj.children.length; i++){
+            console.log("passo n.ro: " + i);
+            if(obj.children[0].children[0].name == name){
+              console.log("trovato figlio!!");
+              obj.children[0].children[0].material = material; //accedo al nipote, che contiene la mesh
+            }
+          }
+          render();
+        }
+
+
+        function init() {
+
+          //LOADER MODELLO GLTF
+          loader = new THREE.GLTFLoader();
+          loader.load('kylo_ren_helmet(gltf)/scene.gltf', function(gltf){
+            let i = 0;
+            gltf.scene.traverse( function ( child ) {
+              if(child.isMesh){
+                child.name = objNames[i];
+                console.log(child.name);
+                i++;
+                child.material = mat1;
+              }
+            });
+            scene.add(gltf.scene);
+          });
+
+          renderer.setClearColor( 0xf0f0f0 );
+
+          camera.position.set( 20, 10, 15 );
+          camera.lookAt(0,0,0);
+
+          scene.add(camera);
+
+          controls.minDistance = 1;
+          controls.maxDistance = 30;
+          controls.enablePan = true; //TODO: mettere false alla fine
+          controls.update();
+
+          document.body.appendChild( renderer.domElement );
+          renderer.setPixelRatio( window.devicePixelRatio );
+          renderer.setSize( window.innerWidth, window.innerHeight );
+
+          window.addEventListener( 'resize', onResize, false );
+
+        }
+
+
+        function onResize() {
+
+          renderer.setSize( window.innerWidth, window.innerHeight );
+          camera.aspect = ( window.innerWidth / window.innerHeight );
+          camera.updateProjectionMatrix();
+
+        }
+
+
+        function update() {
+          requestAnimationFrame( update );
+          render();
+        }
+
+        function render() {
+          renderer.render( scene, camera );
+        }
+
+
+        init();
+        applyMaterial(mat2, "becco");  // <<<<----------  da errore
+        update();
+        render();
+</script>
+</body>
+</html>
