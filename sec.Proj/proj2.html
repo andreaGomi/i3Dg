@@ -90,7 +90,6 @@
 
         //********* MATERIALI **************************
         // carbonio
-				/*
         var carbPath = "textures/carbonFiber/";
         var carbonFiber = new THREE.MeshStandardMaterial({map: loadTexture(carbPath + "albedo.png"),
                                                           envMap: envMap,
@@ -117,7 +116,7 @@
                                                   //normalMap: loadTexture("textures/gold/normal.jpg"),
                                                   roughnessMap: loadTexture(oPath + 'roughness.jpg'),
                                                   side: THREE.DoubleSide});
-*/
+
         var mat1 = new THREE.MeshStandardMaterial({color: 0xeeeeee,
                                                   metalness: 0.8,
                                                   roughness: 0.3,
@@ -156,7 +155,7 @@
         }
 
 
-        function applyMaterial(material, name){
+        function applyMaterial(material, name){			// <<<<-------- ERRORE QUI 
 
           //Un po di debugging
           console.log("scene length: " + scene.children.length);
@@ -179,9 +178,9 @@
           }
           for(let i = 0; i < obj.children.length; i++){
             console.log("passo n.ro: " + i);
-            if(obj.children[0].children[0].name == name){
+            if(obj.children[0].children[0].name == name){ //accedo al nipote, che contiene la mesh
               console.log("trovato figlio!!");
-              obj.children[0].children[0].material = material; //accedo al nipote, che contiene la mesh
+              obj.children[0].children[0].material = material;
             }
           }
           render();
@@ -199,7 +198,7 @@
                 child.name = objNames[i];
                 console.log(child.name);
                 i++;
-                child.material = mat1;
+                child.material = gold;
               }
             });
             scene.add(gltf.scene);
@@ -246,7 +245,7 @@
 
 
         init();
-        applyMaterial(mat2, "becco");  // <<<<----------  da errore
+        applyMaterial(copper, "becco");
         update();
         render();
 </script>
